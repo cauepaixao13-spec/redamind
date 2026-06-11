@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RedaMind — Plataforma de Redação</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+ 
+<!-- ═══════════════════════════════════════
+     LOGIN PAGE
+═══════════════════════════════════════ -->
+<main id="login-page" class="login-page">
+  <div class="login-bg">
+    <div class="login-glow g1"></div>
+    <div class="login-glow g2"></div>
+    <div class="login-dots"></div>
+  </div>
+ 
+  <article class="login-card">
+    <div class="login-logo">
+      <div class="logo-bubble">
+        <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="16" cy="11" r="4.5" stroke="url(#lg1)" stroke-width="2.5"/>
+          <path d="M7.5 26c0-4.694 3.806-8.5 8.5-8.5s8.5 3.806 8.5 8.5" stroke="url(#lg1)" stroke-width="2.5" stroke-linecap="round"/>
+          <defs>
+            <linearGradient id="lg1" x1="7" y1="7" x2="25" y2="26" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#29d4f0"/>
+              <stop offset="1" stop-color="#7c6ff7"/>
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+      <span class="login-brand">Reda<span class="accent">Mind</span></span>
+    </div>
+ 
+    <div class="login-header">
+      <h1>Bem-vindo de volta</h1>
+      <p>Acesse sua jornada para a aprovação</p>
+    </div>
+ 
+    <div class="form-field">
+      <label for="username-input">Usuário</label>
+      <div class="input-wrap">
+        <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+          <circle cx="12" cy="7" r="4"/>
+        </svg>
+        <input type="text" id="username-input" placeholder="Digite seu usuário" autocomplete="username">
+      </div>
+    </div>
+ 
+    <div class="form-field">
+      <label for="password-input">Senha</label>
+      <div class="input-wrap">
+        <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="11" width="18" height="11" rx="2"/>
+          <path d="M7 11V7a5 5 0 0110 0v4"/>
+        </svg>
+        <input type="password" id="password-input" placeholder="Digite sua senha" autocomplete="current-password">
+        <button type="button" class="toggle-pw" id="toggle-pw" aria-label="Mostrar senha">
+          <svg id="eye-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
+          <svg id="eye-closed" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="hidden">
+            <path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/>
+            <line x1="1" y1="1" x2="23" y2="23"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+ 
+    <div id="login-error" class="login-error hidden">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="12" y1="8" x2="12" y2="12"/>
+        <circle cx="12" cy="16" r="0.5" fill="currentColor"/>
+      </svg>
+      Credenciais Inválidas. Tente novamente.
+    </div>
+ 
+    <button id="login-btn" class="btn-primary btn-login">
+      <span class="btn-label">Entrar na plataforma</span>
+      <span class="btn-spinner hidden"></span>
+      <svg class="btn-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="5" y1="12" x2="19" y2="12"/>
+        <polyline points="12 5 19 12 12 19"/>
+      </svg>
+    </button>
+ 
+    <p class="login-hint">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13">
+        <circle cx="12" cy="12" r="10"/>
+        <path d="M12 16v-4M12 8h.01"/>
+      </svg>
+      Use as credenciais fornecidas pelo seu instrutor
+    </p>
+  </article>
+</main>
+ 
+ 
+<!-- ═══════════════════════════════════════
+     DASHBOARD
+═══════════════════════════════════════ -->
+<div id="dashboard-page" class="dashboard hidden">
+ 
+  <!-- Overlay mobile -->
+  <div id="sidebar-overlay" class="sidebar-overlay"></div>
+ 
+  <!-- ── SIDEBAR ── -->
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-sm">
+        <svg viewBox="0 0 32 32" fill="none">
+          <circle cx="16" cy="11" r="4.5" stroke="url(#lg2)" stroke-width="2.5"/>
+          <path d="M7.5 26c0-4.694 3.806-8.5 8.5-8.5s8.5 3.806 8.5 8.5" stroke="url(#lg2)" stroke-width="2.5" stroke-linecap="round"/>
+          <defs>
+            <linearGradient id="lg2" x1="7" y1="7" x2="25" y2="26" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#29d4f0"/>
+              <stop offset="1" stop-color="#7c6ff7"/>
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+      <span class="sidebar-brand">Reda<span class="accent">Mind</span></span>
+    </div>
+ 
+    <nav class="sidebar-nav">
+      <a class="nav-item active" data-section="visao-geral" tabindex="0">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+          <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
+        </svg>
+        <span>Visão geral</span>
+      </a>
+ 
+      <a class="nav-item" data-section="desafio-semanal" tabindex="0">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/>
+        </svg>
+        <span>Desafio Semanal</span>
+      </a>
+ 
+      <a class="nav-item" data-section="modulos" tabindex="0">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/>
+        </svg>
+        <span>Módulos</span>
+      </a>
+ 
+      <a class="nav-item" data-section="flashcards" tabindex="0">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="5" width="20" height="14" rx="2"/>
+          <path d="M2 10h20"/>
+        </svg>
+        <span>Flashcards</span>
+      </a>
+ 
+      <a class="nav-item" data-section="evolucao" tabindex="0">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+          <polyline points="17 6 23 6 23 12"/>
+        </svg>
+        <span>Evolução</span>
+      </a>
+ 
+      <a class="nav-item" data-section="metas" tabindex="0">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>
+        </svg>
+        <span>Metas</span>
+      </a>
+ 
+      <a class="nav-item" data-section="ranking" tabindex="0">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M6 9H4a2 2 0 00-2 2v1.5A4.5 4.5 0 006.5 17H7a5 5 0 0010 0h.5A4.5 4.5 0 0022 12.5V11a2 2 0 00-2-2h-2V3H6v6z"/>
+        </svg>
+        <span>Ranking</span>
+      </a>
+    </nav>
+ 
+    <div class="sidebar-bottom">
+      <div class="streak-widget">
+        <span class="streak-fire">🔥</span>
+        <div>
+          <p class="streak-top">Streak: <strong>7 dias</strong></p>
+          <p class="streak-sub">Continue assim para subir de nível!</p>
+        </div>
+      </div>
+      <a class="nav-item" data-section="configuracoes" tabindex="0">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/>
+        </svg>
+        <span>Configurações</span>
+      </a>
+    </div>
+  </aside>
+ 
+  <!-- ── MOBILE HEADER ── -->
+  <header class="mobile-header">
+    <button id="menu-toggle" class="menu-toggle" aria-label="Abrir menu">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <line x1="3" y1="6" x2="21" y2="6"/>
+        <line x1="3" y1="12" x2="21" y2="12"/>
+        <line x1="3" y1="18" x2="21" y2="18"/>
+      </svg>
+    </button>
+    <span class="mobile-brand">Reda<span class="accent">Mind</span></span>
+    <div style="width:40px"></div>
+  </header>
+ 
+  <!-- ── MAIN CONTENT ── -->
+  <main class="main-content">
+ 
+    <!-- ══════════ VISÃO GERAL ══════════ -->
+    <section id="section-visao-geral" class="content-section active">
+      <div class="page-header">
+        <div>
+          <p class="eyebrow">Olá, estudante 🔥</p>
+          <h1>Sua jornada para a <span class="accent">aprovação</span></h1>
+        </div>
+        <button class="btn-outline" id="btn-novo-desafio">Novo desafio →</button>
+      </div>
+ 
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-icon-box" style="color:#f59e0b">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="17" height="17">
+              <path d="M13.5 0.67s.74 2.65.74 4.8c0 2.06-1.35 3.73-3.41 3.73-2.07 0-3.63-1.67-3.63-3.73l.03-.36C5.21 7.51 4 10.62 4 14c0 4.42 3.58 8 8 8s8-3.58 8-8C20 8.61 17.41 3.8 13.5.67z"/>
+            </svg>
+          </div>
+          <div>
+            <p class="stat-label">Streak</p>
+            <p class="stat-val">7 dias</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon-box" style="color:#29d4f0">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="17" height="17">
+              <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/>
+              <polyline points="16 7 22 7 22 13"/>
+            </svg>
+          </div>
+          <div>
+            <p class="stat-label">Nível</p>
+            <p class="stat-val">Lv. 12</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon-box" style="color:#10b981">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="17" height="17">
+              <path d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/>
+            </svg>
+          </div>
+          <div>
+            <p class="stat-label">Redações</p>
+            <p class="stat-val">14</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon-box" style="color:#7c6ff7">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="17" height="17">
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+            </svg>
+          </div>
+          <div>
+            <p class="stat-label">XP Total</p>
+            <p class="stat-val">2.480</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon-box" style="color:#f97316">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="17" height="17">
+              <circle cx="12" cy="12" r="10"/>
+              <circle cx="12" cy="12" r="6"/>
+              <circle cx="12" cy="12" r="2"/>
+            </svg>
+          </div>
+          <div>
+            <p class="stat-label">Última nota</p>
+            <p class="stat-val">920</p>
+          </div>
+        </div>
+      </div>
+ 
+      <div class="charts-row">
+        <div class="card">
+          <div class="card-head">
+            <h3>Evolução da nota</h3>
+            <div class="card-head-right">
+              <span class="badge-green">+200 pts</span>
+              <span class="text-muted">Últimas 7 semanas</span>
+            </div>
+          </div>
+          <svg id="chart-nota-visao" class="chart-line"></svg>
+        </div>
+        <div class="card">
+          <div class="card-head">
+            <h3>Competências ENEM</h3>
+            <span class="text-muted">Última redação</span>
+          </div>
+          <div class="radar-wrap">
+            <svg id="chart-radar-visao" class="chart-radar"></svg>
+          </div>
+        </div>
+      </div>
+ 
+      <div class="action-row">
+        <div class="card action-card">
+          <div class="action-ico" style="background:rgba(41,212,240,.1)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#29d4f0" stroke-width="2" stroke-linecap="round" width="20" height="20">
+              <path d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/>
+            </svg>
+          </div>
+          <div class="action-body">
+            <span class="tag tag-cyan">Desafio Semanal</span>
+            <p>Tema novo: "Inteligência artificial e o mundo do trabalho"</p>
+            <button class="action-link" data-nav="desafio-semanal">Iniciar →</button>
+          </div>
+        </div>
+        <div class="card action-card">
+          <div class="action-ico" style="background:rgba(124,111,247,.1)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#7c6ff7" stroke-width="2" stroke-linecap="round" width="20" height="20">
+              <path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/>
+            </svg>
+          </div>
+          <div class="action-body">
+            <span class="tag tag-purple">Continuar módulo</span>
+            <p>Proposta de intervenção — 60% concluído</p>
+            <button class="action-link" data-nav="modulos">Continuar →</button>
+          </div>
+        </div>
+        <div class="card action-card">
+          <div class="action-ico" style="background:rgba(16,185,129,.1)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" width="20" height="20">
+              <rect x="2" y="5" width="20" height="14" rx="2"/>
+              <path d="M2 10h20"/>
+            </svg>
+          </div>
+          <div class="action-body">
+            <span class="tag tag-green">Revisão de hoje</span>
+            <p>5 flashcards aguardando — repetição espaçada</p>
+            <button class="action-link" data-nav="flashcards">Revisar →</button>
+          </div>
+        </div>
+      </div>
+    </section>
+ 
+    <!-- ══════════ DESAFIO SEMANAL ══════════ -->
+    <section id="section-desafio-semanal" class="content-section">
+      <div class="eyebrow">DESAFIO SEMANAL ENEM</div>
+      <h1>Os desafios da inteligência artificial no mundo do <span class="accent">trabalho contemporâneo</span></h1>
+      <p class="page-desc">Escreva uma dissertação argumentativa entre 250 e 350 palavras. A RedaMind IA analisa automaticamente.</p>
+ 
+      <div class="desafio-layout">
+        <div class="writing-wrap">
+          <div class="writing-toolbar">
+            <div class="writing-stats">
+              <span id="word-count">0 palavras</span>
+              <span id="word-status" class="wstatus warning">250 para mínimo</span>
+            </div>
+            <div class="writing-actions">
+              <button class="btn-ghost" id="btn-foco">🎯 Modo foco</button>
+              <button class="btn-primary btn-sm" id="btn-save">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+                  <path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/>
+                  <polyline points="17 21 17 13 7 13 7 21"/>
+                </svg>
+                Salvar para IA
+              </button>
+            </div>
+          </div>
+          <textarea id="writing-area" class="writing-area" placeholder="Comece sua redação aqui...&#10;&#10;Dica: Inicie com uma introdução que contextualize o tema e apresente sua tese de forma clara."></textarea>
+        </div>
+ 
+        <aside class="desafio-aside">
+          <div class="card">
+            <h4>✅ Checklist ENEM</h4>
+            <ul class="checklist">
+              <li><span class="check-dot"></span>Introdução com tese</li>
+              <li><span class="check-dot"></span>Dois parágrafos de desenvolvimento</li>
+              <li><span class="check-dot"></span>Proposta de intervenção</li>
+              <li><span class="check-dot"></span>Uso variado de conectivos</li>
+              <li><span class="check-dot"></span>Entre 250-350 palavras</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h4>💡 Dicas estruturais</h4>
+            <ul class="dicas-list">
+              <li>Apresente a IA como presente em 3 áreas específicas na introdução</li>
+              <li>Use repertório sociocultural legitimamente reconhecido</li>
+              <li>Termine com proposta detalhada: agente, ação, meio e finalidade</li>
+            </ul>
+          </div>
+        </aside>
+      </div>
+    </section>
+ 
+    <!-- ══════════ MÓDULOS ══════════ -->
+    <section id="section-modulos" class="content-section">
+      <div class="eyebrow">CURSOS</div>
+      <h1>Módulos do <span class="accent">programa</span></h1>
+      <p class="page-desc">Microlearning + active recall + repetição espaçada</p>
+      <div id="modules-grid" class="modules-grid"></div>
+    </section>
+ 
+    <!-- ══════════ FLASHCARDS ══════════ -->
+    <section id="section-flashcards" class="content-section">
+      <div class="eyebrow">REPETIÇÃO ESPAÇADA</div>
+      <h1>Flashcards de <span class="accent">redação</span></h1>
+      <p class="page-desc">Active recall + algoritmo de repetição espaçada para fixação duradoura.</p>
+ 
+      <div class="fc-layout">
+        <div class="fc-top">
+          <span id="fc-counter" class="fc-counter">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+              <rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/>
+            </svg>
+            Card 1 de 5
+          </span>
+          <span class="text-muted">Sessão de revisão de hoje</span>
+        </div>
+ 
+        <div class="fc-scene">
+          <div id="flashcard" class="flashcard">
+            <div class="fc-inner">
+              <div class="fc-front">
+                <span class="fc-label">PERGUNTA</span>
+                <p id="fc-question" class="fc-text">O que é tese?</p>
+              </div>
+              <div class="fc-back">
+                <span class="fc-label">RESPOSTA</span>
+                <p id="fc-answer" class="fc-text"></p>
+              </div>
+            </div>
+          </div>
+        </div>
+ 
+        <div class="fc-actions">
+          <button id="btn-show-answer" class="btn-primary">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+            Mostrar resposta
+          </button>
+          <div id="diff-btns" class="diff-btns hidden">
+            <button id="btn-hard" class="btn-outline btn-hard">😓 Difícil</button>
+            <button id="btn-easy" class="btn-primary btn-easy">⚡ Fácil</button>
+          </div>
+        </div>
+      </div>
+    </section>
+ 
+    <!-- ══════════ EVOLUÇÃO ══════════ -->
+    <section id="section-evolucao" class="content-section">
+      <div class="eyebrow">EVOLUÇÃO</div>
+      <h1>Sua jornada em <span class="accent">números</span></h1>
+ 
+      <div class="evo-grid-top">
+        <div class="card">
+          <div class="card-head"><h3>Evolução da nota</h3></div>
+          <svg id="chart-nota-evo" class="chart-line"></svg>
+        </div>
+        <div class="card">
+          <div class="card-head"><h3>Tempo estudado (semana)</h3></div>
+          <svg id="chart-tempo" class="chart-bar"></svg>
+        </div>
+      </div>
+      <div class="card evo-bottom">
+        <div class="card-head">
+          <h3>Evolução por competência</h3>
+          <div class="comp-legend" id="comp-legend"></div>
+        </div>
+        <svg id="chart-comp" class="chart-multi"></svg>
+      </div>
+    </section>
+ 
+    <!-- ══════════ METAS ══════════ -->
+    <section id="section-metas" class="content-section">
+      <div class="eyebrow">METAS</div>
+      <h1>Seus <span class="accent">objetivos</span></h1>
+      <div id="goals-grid" class="goals-grid"></div>
+    </section>
+ 
+    <!-- ══════════ RANKING ══════════ -->
+    <section id="section-ranking" class="content-section">
+      <div class="eyebrow">GAMIFICAÇÃO</div>
+      <h1>Ranking <span class="accent">semanal</span></h1>
+      <div id="ranking-list" class="ranking-list"></div>
+    </section>
+ 
+    <!-- ══════════ CONFIGURAÇÕES ══════════ -->
+    <section id="section-configuracoes" class="content-section">
+      <h1>Configurações</h1>
+      <p class="page-desc">Preferências de conta, notificações e tema.</p>
+ 
+      <div class="card settings-card">
+        <h3>Perfil</h3>
+        <div class="settings-row">
+          <div class="form-field">
+            <label>Nome de exibição</label>
+            <div class="input-wrap no-icon"><input type="text" value="Caue" readonly></div>
+          </div>
+          <div class="form-field">
+            <label>Meta de nota (ENEM)</label>
+            <div class="input-wrap no-icon"><input type="number" value="950" min="0" max="1000"></div>
+          </div>
+        </div>
+        <div class="settings-row">
+          <div class="form-field">
+            <label>Redações por semana</label>
+            <div class="input-wrap no-icon"><input type="number" value="1" min="1" max="7"></div>
+          </div>
+          <div class="form-field">
+            <label>Meta de streak (dias)</label>
+            <div class="input-wrap no-icon"><input type="number" value="30" min="1"></div>
+          </div>
+        </div>
+        <button class="btn-primary" style="margin-top:.75rem">Salvar preferências</button>
+      </div>
+ 
+      <div class="card settings-card danger-zone">
+        <h3>Sessão</h3>
+        <p class="text-muted">Encerrar a sessão atual e voltar para a tela de login.</p>
+        <button id="logout-btn" class="btn-outline btn-danger" style="margin-top:.5rem">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15">
+            <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/>
+          </svg>
+          Sair da conta
+        </button>
+      </div>
+    </section>
+ 
+  </main><!-- /main-content -->
+</div><!-- /dashboard -->
+ 
+<script src="main.js"></script>
+</body>
+</html>
+ 
+
