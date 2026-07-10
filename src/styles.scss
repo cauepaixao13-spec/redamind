@@ -46,6 +46,11 @@
   /* Transitions */
   --ease: cubic-bezier(0.4, 0, 0.2, 1);
   --duration: 0.2s;
+
+  /* O app é 100% dark (não existe tema claro), então isso diz ao navegador
+     para renderizar controles nativos (select, scrollbar, etc.) na variante
+     escura — sem isso o dropdown de <select> abre com fundo branco do SO. */
+  color-scheme: dark;
 }
 
 /* ---- Temas alternativos ----
@@ -99,6 +104,16 @@ button {
 input, textarea {
   font-family: inherit;
   outline: none;
+}
+
+/* Reforço: color-scheme resolve a maioria dos casos, mas nem todo navegador
+   respeita 100%. Fixamos fundo/cor das opções do dropdown explicitamente. */
+select {
+  color-scheme: dark;
+}
+option {
+  background-color: var(--bg-card);
+  color: var(--text-primary);
 }
 
 ul { list-style: none; }
