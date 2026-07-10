@@ -70,7 +70,7 @@ src/
 ## Clone o repositório
 
 ```bash
-git clone https://github.com/SEU-USUARIO/redamind.git
+git clone https://github.com/cauepaixao13-spec/redamind.git
 ```
 
 Entre na pasta
@@ -88,7 +88,7 @@ npm install
 Execute o projeto
 
 ```bash
-npm start
+npm start / ng serve
 ```
 
 A aplicação estará disponível em:
@@ -125,7 +125,3 @@ O RedaMind busca tornar a preparação para a redação do ENEM mais eficiente a
 Projeto desenvolvido como requisito do programa **Ford Enter**, utilizando Angular, TypeScript e boas práticas de desenvolvimento Front-End.
 
 ---
-
-# 📄 Licença
-
-Este projeto foi desenvolvido para fins educacionais.
