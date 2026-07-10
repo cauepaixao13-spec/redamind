@@ -14,7 +14,7 @@ import { LogoIconComponent } from '../../../shared/brand/logo-icon.component';
   <!-- Logo -->
   <div class="sidebar-logo">
     <redamind-logo [size]="30"></redamind-logo>
-    <span class="logo-text">RedalMind</span>
+    <span class="logo-text">Redamind</span>
     <!-- Botão de fechar, visível apenas no menu hambúrguer mobile -->
     <button class="mobile-close-btn" type="button" aria-label="Fechar menu" (click)="closeMobile.emit()">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">

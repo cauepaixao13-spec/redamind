@@ -26,7 +26,7 @@ import { PLANOS, PlanId } from '../../../core/models/user.model';
   <div class="register-card">
     <div class="register-logo">
       <redamind-logo [size]="32"></redamind-logo>
-      <span>RedalMind</span>
+      <span>Redamind</span>
     </div>
 
     <h1>Crie sua conta</h1>

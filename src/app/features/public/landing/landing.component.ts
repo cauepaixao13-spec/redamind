@@ -14,7 +14,7 @@ import { CarouselComponent } from '../../../shared/carousel/carousel.component';
   <div class="nav-inner">
     <a routerLink="/" class="logo">
       <redamind-logo [size]="32"></redamind-logo>
-      <span>RedalMind</span>
+      <span>Redamind</span>
     </a>
     <ul class="nav-links" [class.open]="menuOpen()">
       <li><a href="#metodologia" (click)="menuOpen.set(false)">Metodologia</a></li>
@@ -151,7 +151,7 @@ import { CarouselComponent } from '../../../shared/carousel/carousel.component';
       <div class="corr-header">
         <div class="corr-avatar">RM</div>
         <div>
-          <div class="corr-name">Análise da RedalMind IA</div>
+          <div class="corr-name">Análise da Redamind IA</div>
           <div class="corr-theme">Tema: Desafios da educação digital</div>
         </div>
         <div class="corr-score">
@@ -246,7 +246,7 @@ import { CarouselComponent } from '../../../shared/carousel/carousel.component';
     <div class="footer-brand">
       <div class="logo">
         <redamind-logo [size]="32"></redamind-logo>
-        <span>RedalMind</span>
+        <span>Redamind</span>
       </div>
       <p>Transformando escrita em aprovação. A plataforma inteligente para evoluir sua redação com IA educacional e ciência da aprendizagem.</p>
     </div>
@@ -270,7 +270,7 @@ import { CarouselComponent } from '../../../shared/carousel/carousel.component';
     </div>
   </div>
   <div class="footer-bottom">
-    <span>© 2024 RedalMind. Todos os direitos reservados.</span>
+    <span>© 2024 Redamind. Todos os direitos reservados.</span>
     <span>Feito com ciência da aprendizagem.</span>
   </div>
 </footer>
@@ -540,7 +540,7 @@ export class LandingComponent implements OnInit {
   faqItems = [
     { q: 'Como funciona a correção por IA?', a: 'Nossa IA analisa sua redação em tempo real avaliando as 5 competências do ENEM: domínio da norma culta, compreensão da proposta, argumentação, coesão/coerência e proposta de intervenção. O resultado inclui nota simulada, pontos fortes, erros estruturais e repertório sugerido.' },
     { q: 'Preciso pagar para começar?', a: 'Não! Você pode começar gratuitamente com acesso ao desafio semanal e aos primeiros módulos. O plano completo desbloqueia todos os módulos, flashcards ilimitados, histórico de correções e análise avançada de competências.' },
-    { q: 'O RedalMind funciona para outros vestibulares além do ENEM?', a: 'Sim. Embora nosso foco principal seja o ENEM, as habilidades desenvolvidas — argumentação estruturada, repertório sociocultural e norma culta — são aplicáveis a Fuvest, UNICAMP, ESPM e outros processos seletivos.' },
+    { q: 'O Redamind funciona para outros vestibulares além do ENEM?', a: 'Sim. Embora nosso foco principal seja o ENEM, as habilidades desenvolvidas — argumentação estruturada, repertório sociocultural e norma culta — são aplicáveis a Fuvest, UNICAMP, ESPM e outros processos seletivos.' },
     { q: 'Quanto tempo por dia preciso dedicar?', a: 'Recomendamos 20 a 40 minutos por dia. Nosso sistema de microlearning foi desenhado para caber na rotina real de um estudante. Com consistência, você verá resultados expressivos em semanas.' },
   ];
 

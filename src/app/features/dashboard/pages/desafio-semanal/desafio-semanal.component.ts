@@ -12,7 +12,7 @@ import { FormsModule } from '@angular/forms';
     <div>
       <p class="eyebrow">DESAFIO SEMANAL ENEM</p>
       <h1>Os desafios da inteligência artificial no mundo do trabalho contemporâneo</h1>
-      <p class="page-sub">Escreva uma dissertação argumentativa entre 250 e 350 palavras. A RedalMind IA avalia automaticamente.</p>
+      <p class="page-sub">Escreva uma dissertação argumentativa entre 250 e 350 palavras. A Redamind IA avalia automaticamente.</p>
     </div>
   </div>
 

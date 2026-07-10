@@ -25,7 +25,7 @@ import { LogoIconComponent } from '../../../shared/brand/logo-icon.component';
   <div class="login-card">
     <div class="login-logo">
       <redamind-logo [size]="32"></redamind-logo>
-      <span>RedalMind</span>
+      <span>Redamind</span>
     </div>
 
     <h1>Bem-vindo de volta</h1>
