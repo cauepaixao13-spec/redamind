@@ -1,6 +1,9 @@
 import { Component, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { AuthService } from '../../../../core/services/auth.service';
+import { EssayCorrectionService } from '../../../../core/services/essay-correction.service';
+import { CorrecaoResult, NOMES_COMPETENCIAS } from '../../../../core/models/correcao.model';
 
 @Component({
   selector: 'app-desafio-semanal',
@@ -34,11 +37,18 @@ import { FormsModule } from '@angular/forms';
             Modo foco
           </button>
         </div>
-        <button class="btn-submit-essay" (click)="submitEssay()" [disabled]="wordCount() < 50">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
-          </svg>
-          Enviar para IA
+        <button class="btn-submit-essay" (click)="submitEssay()" [disabled]="wordCount() < 50 || corrigindo()">
+          @if (corrigindo()) {
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="spin">
+              <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+            </svg>
+            Corrigindo...
+          } @else {
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+            </svg>
+            Enviar para IA
+          }
         </button>
       </div>
 
@@ -59,15 +69,48 @@ import { FormsModule } from '@angular/forms';
           </div>
           <span class="progress-label">{{ progressPct() | number:'1.0-0' }}% da meta (250 palavras)</span>
         </div>
-        @if (submitted()) {
-          <div class="success-banner">
+        @if (erroCorrecao()) {
+          <div class="error-banner">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-              <polyline points="20 6 9 17 4 12"/>
+              <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
             </svg>
-            Redação enviada! A IA está analisando...
+            {{ erroCorrecao() }}
           </div>
         }
       </div>
+
+      @if (correcao(); as resultado) {
+        <div class="result-panel card">
+          <div class="result-header">
+            <h3>Resultado da correção</h3>
+            <div class="score-total">{{ resultado.nota_total }}<span>/1000</span></div>
+          </div>
+          <div class="competencias-grid">
+            @for (c of resultado.competencias; track c.numero) {
+              <div class="competencia-item">
+                <div class="competencia-top">
+                  <span class="competencia-label">C{{ c.numero }} · {{ nomesCompetencias[c.numero] }}</span>
+                  <span class="competencia-nota">{{ c.nota }}/200</span>
+                </div>
+                <div class="progress-bar">
+                  <div class="progress-fill" [style.width.%]="(c.nota / 200) * 100"></div>
+                </div>
+                <p class="competencia-justificativa">{{ c.justificativa }}</p>
+              </div>
+            }
+          </div>
+          <div class="feedback-cols">
+            <div>
+              <h4>Pontos fortes</h4>
+              <p>{{ resultado.pontos_fortes }}</p>
+            </div>
+            <div>
+              <h4>Pontos a melhorar</h4>
+              <p>{{ resultado.pontos_a_melhorar }}</p>
+            </div>
+          </div>
+        </div>
+      }
     </div>
 
     <!-- Sidebar column -->
@@ -194,6 +237,36 @@ h1 { font-size: 1.4rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom
   background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.2);
   border-radius: 6px; color: var(--green); font-size: 0.78rem; font-weight: 600;
 }
+.error-banner {
+  display: flex; align-items: center; gap: 8px; padding: 6px 14px;
+  background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.2);
+  border-radius: 6px; color: var(--red); font-size: 0.78rem; font-weight: 600;
+}
+.spin { animation: spin 0.8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Result panel */
+.result-panel { margin-top: 20px; padding: 24px; animation: fadeIn 0.4s ease; }
+.result-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+.result-header h3 { font-size: 1rem; font-weight: 700; }
+.score-total {
+  font-size: 1.8rem; font-weight: 800; color: var(--accent);
+  span { font-size: 0.9rem; font-weight: 500; color: var(--text-muted); }
+}
+.competencias-grid { display: flex; flex-direction: column; gap: 16px; margin-bottom: 24px; }
+.competencia-item { padding-bottom: 14px; border-bottom: 1px solid var(--border-card); &:last-child { border-bottom: none; padding-bottom: 0; } }
+.competencia-top { display: flex; justify-content: space-between; margin-bottom: 6px; }
+.competencia-label { font-size: 0.82rem; font-weight: 600; color: var(--text-secondary); }
+.competencia-nota { font-size: 0.82rem; font-weight: 700; color: var(--accent); }
+.competencia-justificativa { font-size: 0.8rem; color: var(--text-muted); margin-top: 8px; line-height: 1.6; }
+.feedback-cols {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 20px; padding-top: 20px; border-top: 1px solid var(--border-card);
+  h4 { font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-secondary); margin-bottom: 8px; }
+  p { font-size: 0.82rem; color: var(--text-muted); line-height: 1.6; }
+}
+@media (max-width: 700px) {
+  .feedback-cols { grid-template-columns: 1fr; }
+}
 
 /* Sidebar cards */
 .sidebar-col { display: flex; flex-direction: column; gap: 16px; }
@@ -236,8 +309,18 @@ h1 { font-size: 1.4rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom
 export class DesafioSemanalComponent {
   essayText = signal('');
   focusMode = signal(false);
-  submitted = signal(false);
+  corrigindo = signal(false);
+  correcao = signal<CorrecaoResult | null>(null);
+  erroCorrecao = signal<string | null>(null);
+  nomesCompetencias = NOMES_COMPETENCIAS;
   Math = Math;
+
+  private tema = 'Os desafios da inteligência artificial no mundo do trabalho contemporâneo';
+
+  constructor(
+    private auth: AuthService,
+    private essayCorrection: EssayCorrectionService,
+  ) {}
 
   checklist = [
     { label: 'Introdução com tese', done: false },
@@ -259,8 +342,29 @@ export class DesafioSemanalComponent {
   progressPct = computed(() => Math.min((this.wordCount() / 250) * 100, 100));
 
   submitEssay() {
-    if (this.wordCount() < 50) return;
-    this.submitted.set(true);
-    setTimeout(() => this.submitted.set(false), 4000);
+    if (this.wordCount() < 50 || this.corrigindo()) return;
+
+    const user = this.auth.currentUser();
+    if (!user) return;
+
+    this.corrigindo.set(true);
+    this.erroCorrecao.set(null);
+    this.correcao.set(null);
+
+    this.essayCorrection.corrigir({
+      userId: user.id,
+      plan: user.plan,
+      tema: this.tema,
+      texto: this.essayText(),
+    }).subscribe({
+      next: (resultado) => {
+        this.correcao.set(resultado);
+        this.corrigindo.set(false);
+      },
+      error: (err) => {
+        this.erroCorrecao.set(err.message);
+        this.corrigindo.set(false);
+      },
+    });
   }
 }
