@@ -1,7 +1,6 @@
 import { Component, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { AuthService } from '../../../../core/services/auth.service';
 import { EssayCorrectionService } from '../../../../core/services/essay-correction.service';
 import { CorrecaoResult, NOMES_COMPETENCIAS } from '../../../../core/models/correcao.model';
 
@@ -318,7 +317,6 @@ export class DesafioSemanalComponent {
   private tema = 'Os desafios da inteligência artificial no mundo do trabalho contemporâneo';
 
   constructor(
-    private auth: AuthService,
     private essayCorrection: EssayCorrectionService,
   ) {}
 
@@ -341,30 +339,23 @@ export class DesafioSemanalComponent {
 
   progressPct = computed(() => Math.min((this.wordCount() / 250) * 100, 100));
 
-  submitEssay() {
+  async submitEssay() {
     if (this.wordCount() < 50 || this.corrigindo()) return;
-
-    const user = this.auth.currentUser();
-    if (!user) return;
 
     this.corrigindo.set(true);
     this.erroCorrecao.set(null);
     this.correcao.set(null);
 
-    this.essayCorrection.corrigir({
-      userId: user.id,
-      plan: user.plan,
-      tema: this.tema,
-      texto: this.essayText(),
-    }).subscribe({
-      next: (resultado) => {
-        this.correcao.set(resultado);
-        this.corrigindo.set(false);
-      },
-      error: (err) => {
-        this.erroCorrecao.set(err.message);
-        this.corrigindo.set(false);
-      },
-    });
+    try {
+      const resultado = await this.essayCorrection.corrigir({
+        tema: this.tema,
+        texto: this.essayText(),
+      });
+      this.correcao.set(resultado);
+    } catch (err) {
+      this.erroCorrecao.set(err instanceof Error ? err.message : 'Erro ao corrigir a redação.');
+    } finally {
+      this.corrigindo.set(false);
+    }
   }
 }

@@ -42,24 +42,18 @@ export const DEFAULT_SETTINGS: UserSettings = {
   },
 };
 
-/** Registro completo salvo em `redamind:users` (a "tabela" de usuários no LocalStorage). */
-export interface UserRecord {
+/**
+ * Usuário autenticado via Supabase Auth. `id`/`email` vêm de `auth.users`;
+ * o resto vem da tabela `profiles` (criada automaticamente no cadastro via
+ * trigger `handle_new_user`, ver migration).
+ */
+export interface PublicUser {
   id: string;
+  email: string;
   fullName: string;
   displayName: string;
-  email: string;
-  /** Nunca guardamos a senha em texto puro — ver `password.util.ts`. */
-  passwordHash: string;
   plan: PlanId;
   lgpdAcceptedAt: string;
   createdAt: string;
   settings: UserSettings;
-}
-
-/** Versão pública do usuário (sem o hash da senha), usada em toda a UI. */
-export type PublicUser = Omit<UserRecord, 'passwordHash'>;
-
-export function toPublicUser(user: UserRecord): PublicUser {
-  const { passwordHash, ...rest } = user;
-  return rest;
 }
