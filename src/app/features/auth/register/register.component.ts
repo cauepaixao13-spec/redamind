@@ -255,28 +255,26 @@ export class RegisterComponent {
     }
   }
 
-  onSubmit() {
+  async onSubmit() {
     this.loading.set(true);
     this.errorMsg.set('');
 
-    setTimeout(() => {
-      const result = this.authService.register({
-        fullName: this.fullName,
-        displayName: this.displayName,
-        email: this.email,
-        emailConfirm: this.emailConfirm,
-        password: this.password,
-        passwordConfirm: this.passwordConfirm,
-        lgpdAccepted: this.lgpdAccepted,
-        plan: this.plan,
-      });
-      this.loading.set(false);
+    const result = await this.authService.register({
+      fullName: this.fullName,
+      displayName: this.displayName,
+      email: this.email,
+      emailConfirm: this.emailConfirm,
+      password: this.password,
+      passwordConfirm: this.passwordConfirm,
+      lgpdAccepted: this.lgpdAccepted,
+      plan: this.plan,
+    });
+    this.loading.set(false);
 
-      if (result.success) {
-        this.router.navigate(['/dashboard']);
-      } else {
-        this.errorMsg.set(result.error ?? 'Não foi possível criar sua conta.');
-      }
-    }, 500);
+    if (result.success) {
+      this.router.navigate(['/dashboard']);
+    } else {
+      this.errorMsg.set(result.error ?? 'Não foi possível criar sua conta.');
+    }
   }
 }
