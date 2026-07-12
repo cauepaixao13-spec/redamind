@@ -1,27 +1,25 @@
 import { Injectable } from '@angular/core';
-import { CORRIGIR_REDACAO_URL } from '../config/supabase.config';
-import { supabase } from '../config/supabase.client';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { Observable, catchError, throwError } from 'rxjs';
+import { SUPABASE_CONFIG, CORRIGIR_REDACAO_URL } from '../config/supabase.config';
 import { CorrecaoResult } from '../models/correcao.model';
 
 @Injectable({ providedIn: 'root' })
 export class EssayCorrectionService {
-  async corrigir(params: { tema: string; texto: string }): Promise<CorrecaoResult> {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) throw new Error('Você precisa estar logado para corrigir uma redação.');
+  constructor(private http: HttpClient) {}
 
-    const res = await fetch(CORRIGIR_REDACAO_URL, {
-      method: 'POST',
+  corrigir(params: { userId: string; plan: string; tema: string; texto: string }): Observable<CorrecaoResult> {
+    return this.http.post<CorrecaoResult>(CORRIGIR_REDACAO_URL, params, {
       headers: {
-        Authorization: `Bearer ${session.access_token}`,
+        Authorization: `Bearer ${SUPABASE_CONFIG.anonKey}`,
+        apikey: SUPABASE_CONFIG.anonKey,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(params),
-    });
-
-    const data = await res.json();
-    if (!res.ok) {
-      throw new Error(data.error || 'Não foi possível corrigir a redação agora. Tente novamente.');
-    }
-    return data as CorrecaoResult;
+    }).pipe(
+      catchError((err: HttpErrorResponse) => {
+        const msg = err.error?.error || 'Não foi possível corrigir a redação agora. Tente novamente.';
+        return throwError(() => new Error(msg));
+      }),
+    );
   }
 }

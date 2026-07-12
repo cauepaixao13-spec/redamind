@@ -1,9 +1,9 @@
 import { Injectable, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { StorageService } from './storage.service';
-import { supabase } from '../config/supabase.client';
+import { hashPassword } from '../utils/password.util';
 import {
-  PublicUser, PlanId, UserSettings, DEFAULT_SETTINGS
+  UserRecord, PublicUser, PlanId, UserSettings, DEFAULT_SETTINGS, toPublicUser
 } from '../models/user.model';
 
 /** Dados vindos do formulário de cadastro. */
@@ -24,115 +24,82 @@ export interface AuthResult {
   error?: string;
 }
 
-/** Formato da linha de `profiles` (snake_case, como está no banco). */
-interface ProfileRow {
-  id: string;
-  full_name: string;
-  display_name: string;
-  plan: PlanId;
-  lgpd_accepted_at: string;
-  settings: UserSettings;
-  created_at: string;
-}
-
-function toPublicUser(email: string, profile: ProfileRow): PublicUser {
-  return {
-    id: profile.id,
-    email,
-    fullName: profile.full_name,
-    displayName: profile.display_name,
-    plan: profile.plan,
-    lgpdAcceptedAt: profile.lgpd_accepted_at,
-    createdAt: profile.created_at,
-    settings: { ...DEFAULT_SETTINGS, ...profile.settings },
-  };
-}
+const USERS_KEY = 'users';       // guarda a lista inteira de UserRecord (nosso "banco de usuários")
+const SESSION_KEY = 'session';   // guarda só o id do usuário logado no momento
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  /** Usuário autenticado no momento — `null` se ninguém estiver logado. */
+  /** Usuário autenticado no momento (sem a senha) — `null` se ninguém estiver logado. */
   currentUser = signal<PublicUser | null>(null);
   /** Facilita o uso em *ngIf / guard sem precisar checar `currentUser() !== null` toda vez. */
   isAuthenticated = signal<boolean>(false);
-  /** true assim que a sessão inicial (restaurada do Supabase) já foi checada. */
-  ready = signal<boolean>(false);
 
   constructor(private storage: StorageService, private router: Router) {
-    this.init();
+    this.restoreSession();
   }
 
   // ---------------------------------------------------------------------
   // Sessão
   // ---------------------------------------------------------------------
 
-  private async init() {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (session?.user) {
-      await this.loadProfileIntoSession(session.user.id, session.user.email ?? '');
-    }
-    this.ready.set(true);
+  /** Ao iniciar o app, tenta recuperar quem estava logado antes de recarregar a página. */
+  private restoreSession() {
+    const sessionUserId = this.storage.get<string | null>(SESSION_KEY, null);
+    if (!sessionUserId) return;
 
-    // Mantém os signals sincronizados se o token expirar/renovar ou o usuário
-    // deslogar em outra aba.
-    supabase.auth.onAuthStateChange(async (_event, session) => {
-      if (session?.user) {
-        await this.loadProfileIntoSession(session.user.id, session.user.email ?? '');
-      } else {
-        this.currentUser.set(null);
-        this.isAuthenticated.set(false);
-      }
-    });
+    const user = this.findUserById(sessionUserId);
+    if (user) {
+      this.currentUser.set(toPublicUser(user));
+      this.isAuthenticated.set(true);
+    } else {
+      // Sessão apontava pra um usuário que não existe mais (conta excluída, storage editado à mão etc).
+      this.storage.remove(SESSION_KEY);
+    }
   }
 
-  private async loadProfileIntoSession(userId: string, email: string) {
-    const { data: profile, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', userId)
-      .single();
+  private getUsers(): UserRecord[] {
+    return this.storage.get<UserRecord[]>(USERS_KEY, []);
+  }
 
-    if (error || !profile) {
-      this.currentUser.set(null);
-      this.isAuthenticated.set(false);
-      return;
-    }
+  private saveUsers(users: UserRecord[]) {
+    this.storage.set(USERS_KEY, users);
+  }
 
-    this.currentUser.set(toPublicUser(email, profile as ProfileRow));
-    this.isAuthenticated.set(true);
+  private findUserById(id: string): UserRecord | undefined {
+    return this.getUsers().find(u => u.id === id);
+  }
+
+  private findUserByEmail(email: string): UserRecord | undefined {
+    const normalized = email.trim().toLowerCase();
+    return this.getUsers().find(u => u.email.toLowerCase() === normalized);
   }
 
   // ---------------------------------------------------------------------
   // Registro
   // ---------------------------------------------------------------------
 
-  async register(payload: RegisterPayload): Promise<AuthResult> {
+  register(payload: RegisterPayload): AuthResult {
     const validation = this.validateRegister(payload);
     if (!validation.success) return validation;
 
-    const { data, error } = await supabase.auth.signUp({
+    const now = new Date().toISOString();
+    const user: UserRecord = {
+      id: crypto.randomUUID(),
+      fullName: payload.fullName.trim(),
+      displayName: payload.displayName.trim(),
       email: payload.email.trim().toLowerCase(),
-      password: payload.password,
-      options: {
-        data: {
-          full_name: payload.fullName.trim(),
-          display_name: payload.displayName.trim(),
-          plan: payload.plan,
-        },
-      },
-    });
+      passwordHash: hashPassword(payload.password),
+      plan: payload.plan,
+      lgpdAcceptedAt: now,
+      createdAt: now,
+      settings: { ...DEFAULT_SETTINGS },
+    };
 
-    if (error) {
-      return { success: false, error: this.mapAuthError(error.message) };
-    }
-    if (!data.session) {
-      // Confirmação de e-mail está ligada no projeto — sem sessão imediata.
-      return {
-        success: false,
-        error: 'Conta criada! Confirme seu e-mail antes de entrar (verifique sua caixa de entrada).',
-      };
-    }
+    const users = this.getUsers();
+    users.push(user);
+    this.saveUsers(users);
 
-    await this.loadProfileIntoSession(data.session.user.id, data.session.user.email ?? '');
+    this.startSession(user);
     return { success: true };
   }
 
@@ -156,79 +123,67 @@ export class AuthService {
     if (!payload.lgpdAccepted) {
       return { success: false, error: 'É necessário aceitar os termos da LGPD para continuar.' };
     }
+    if (this.findUserByEmail(payload.email)) {
+      return { success: false, error: 'Já existe uma conta cadastrada com este e-mail.' };
+    }
     return { success: true };
-  }
-
-  private mapAuthError(message: string): string {
-    if (message.includes('already registered') || message.includes('already been registered')) {
-      return 'Já existe uma conta cadastrada com este e-mail.';
-    }
-    if (message.includes('Invalid login credentials')) {
-      return 'E-mail ou senha incorretos.';
-    }
-    if (message.includes('Password should be at least')) {
-      return 'A senha precisa ter pelo menos 8 caracteres.';
-    }
-    return message;
   }
 
   // ---------------------------------------------------------------------
   // Login / logout
   // ---------------------------------------------------------------------
 
-  async login(email: string, password: string): Promise<AuthResult> {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email: email.trim().toLowerCase(),
-      password,
-    });
-
-    if (error) {
-      return { success: false, error: this.mapAuthError(error.message) };
+  login(email: string, password: string): AuthResult {
+    const user = this.findUserByEmail(email);
+    if (!user || user.passwordHash !== hashPassword(password)) {
+      return { success: false, error: 'E-mail ou senha incorretos.' };
     }
-
-    await this.loadProfileIntoSession(data.user.id, data.user.email ?? '');
+    this.startSession(user);
     return { success: true };
   }
 
-  async logout(): Promise<void> {
-    await supabase.auth.signOut();
+  private startSession(user: UserRecord) {
+    this.storage.set(SESSION_KEY, user.id);
+    this.currentUser.set(toPublicUser(user));
+    this.isAuthenticated.set(true);
+  }
+
+  logout(): void {
+    this.storage.remove(SESSION_KEY);
     this.currentUser.set(null);
     this.isAuthenticated.set(false);
     this.router.navigate(['/']);
   }
 
   // ---------------------------------------------------------------------
-  // Configurações do usuário
+  // Configurações do usuário (persistidas junto do próprio registro do usuário)
   // ---------------------------------------------------------------------
 
   /** Aplica um patch parcial nas configurações do usuário logado, salva e já reflete no signal `currentUser`. */
-  async updateSettings(patch: Partial<UserSettings>): Promise<void> {
+  updateSettings(patch: Partial<UserSettings>): void {
     const current = this.currentUser();
     if (!current) return;
 
-    const newSettings = { ...current.settings, ...patch };
-    const { error } = await supabase
-      .from('profiles')
-      .update({ settings: newSettings })
-      .eq('id', current.id);
+    const users = this.getUsers();
+    const index = users.findIndex(u => u.id === current.id);
+    if (index === -1) return;
 
-    if (!error) {
-      this.currentUser.set({ ...current, settings: newSettings });
-    }
+    users[index].settings = { ...users[index].settings, ...patch };
+    this.saveUsers(users);
+    this.currentUser.set(toPublicUser(users[index]));
   }
 
-  async updatePlan(plan: PlanId): Promise<void> {
+  updatePlan(plan: PlanId): void {
     const current = this.currentUser();
     if (!current) return;
 
-    const { error } = await supabase
-      .from('profiles')
-      .update({ plan })
-      .eq('id', current.id);
+    const users = this.getUsers();
+    const index = users.findIndex(u => u.id === current.id);
+    if (index === -1) return;
 
-    if (!error) {
-      this.currentUser.set({ ...current, plan });
-    }
+    users[index].plan = plan;
+    this.saveUsers(users);
+    this.currentUser.set(toPublicUser(users[index]));
   }
 
   // ---------------------------------------------------------------------
@@ -236,30 +191,27 @@ export class AuthService {
   // ---------------------------------------------------------------------
 
   /**
-   * Apaga permanentemente a conta do usuário logado. Deletar de `auth.users`
-   * exige privilégio de admin (service_role), por isso chamamos o Edge
-   * Function `deletar-conta`, que faz isso com o token da própria sessão
-   * (garantindo que só dá pra apagar a própria conta, nunca a de outra pessoa).
+   * Apaga permanentemente a conta do usuário logado: remove o registro de
+   * `users`, apaga os dados vinculados a ele (flashcards, sessões de estudo,
+   * metas) e encerra a sessão. Não há como desfazer isso.
+   *
+   * Nota de design: em vez de o AuthService injetar FlashcardsService/
+   * GoalsService (o que criaria uma dependência circular, já que ambos
+   * dependem do AuthService pra saber QUEM está logado), ele só conhece o
+   * padrão de nome das chaves (`flashcards:<id>`, etc.) e remove direto pelo
+   * StorageService. É um pequeno acoplamento por convenção, documentado aqui.
    */
-  async deleteAccount(): Promise<void> {
+  deleteAccount(): void {
     const current = this.currentUser();
     if (!current) return;
 
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) return;
-
-    await fetch(`https://xoxlnhodlxsamzlxnmof.supabase.co/functions/v1/deletar-conta`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${session.access_token}`,
-        'Content-Type': 'application/json',
-      },
-    });
+    const users = this.getUsers().filter(u => u.id !== current.id);
+    this.saveUsers(users);
 
     this.storage.remove(`flashcards:${current.id}`);
     this.storage.remove(`study-sessions:${current.id}`);
     this.storage.remove(`goals:${current.id}`);
 
-    await this.logout();
+    this.logout();
   }
 }

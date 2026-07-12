@@ -201,7 +201,7 @@ export class LoginComponent {
     }
   }
 
-  async onSubmit() {
+  onSubmit() {
     if (!this.email.trim() || !this.password) {
       this.errorMsg.set('Preencha e-mail e senha.');
       return;
@@ -209,12 +209,15 @@ export class LoginComponent {
     this.loading.set(true);
     this.errorMsg.set('');
 
-    const result = await this.authService.login(this.email, this.password);
-    this.loading.set(false);
-    if (result.success) {
-      this.router.navigate(['/dashboard']);
-    } else {
-      this.errorMsg.set(result.error ?? 'Não foi possível entrar.');
-    }
+    // Pequeno delay artificial só pra dar a sensação de "carregando" (não há chamada de rede de verdade — tudo é LocalStorage síncrono).
+    setTimeout(() => {
+      const result = this.authService.login(this.email, this.password);
+      this.loading.set(false);
+      if (result.success) {
+        this.router.navigate(['/dashboard']);
+      } else {
+        this.errorMsg.set(result.error ?? 'Não foi possível entrar.');
+      }
+    }, 500);
   }
 }
