@@ -40,6 +40,11 @@ export const routes: Routes = [
           import('./features/dashboard/pages/modulos/modulos.component').then(m => m.ModulosComponent),
       },
       {
+        path: 'modulos/:moduloId/aula/:aulaId',
+        loadComponent: () =>
+          import('./features/dashboard/pages/modulos/aula/aula.component').then(m => m.AulaComponent),
+      },
+      {
         path: 'flashcards',
         loadComponent: () =>
           import('./features/dashboard/pages/flashcards/flashcards.component').then(m => m.FlashcardsComponent),

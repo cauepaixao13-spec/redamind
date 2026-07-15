@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { DataService, Module } from '../../../../core/services/data.service';
+import { Router } from '@angular/router';
+import { ModulosService } from '../../../../core/services/modulos.service';
+import { Modulo } from '../../../../core/models/modulo.model';
 
 @Component({
   selector: 'app-modulos',
@@ -28,10 +30,10 @@ import { DataService, Module } from '../../../../core/services/data.service';
 
   <div class="modules-grid">
     @for (mod of modules; track mod.id) {
-      <div class="module-card card" [class.completed]="mod.completed">
+      <div class="module-card card" [class.completed]="mod.completo">
         <div class="module-top">
-          <div class="module-icon" [class.done]="mod.completed">
-            @if (mod.completed) {
+          <div class="module-icon" [class.done]="mod.completo">
+            @if (mod.completo) {
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                 <polyline points="20 6 9 17 4 12"/>
               </svg>
@@ -42,48 +44,43 @@ import { DataService, Module } from '../../../../core/services/data.service';
               </svg>
             }
           </div>
-          @if (mod.completed) {
+          @if (mod.completo) {
             <div class="badge-done">Concluído</div>
-          } @else if (mod.progress > 0) {
+          } @else if (mod.progresso > 0) {
             <div class="badge-progress">Em andamento</div>
           }
         </div>
 
-        <h3>{{ mod.title }}</h3>
-        <p class="mod-subtitle">{{ mod.subtitle }}</p>
+        <h3>{{ mod.titulo }}</h3>
+        <p class="mod-subtitle">{{ mod.subtitulo }}</p>
 
         <div class="mod-meta">
-          <span class="meta-item">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
-            </svg>
-            {{ mod.duration }}
-          </span>
           <span class="meta-item">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
               <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
             </svg>
-            {{ mod.lessons }} aulas
+            {{ mod.aulas.length }} aulas
           </span>
         </div>
 
         <div class="mod-progress">
           <div class="progress-bar">
             <div class="progress-fill"
-              [style.width.%]="mod.progress"
-              [style.background]="mod.completed ? 'var(--green)' : 'linear-gradient(90deg,#0080d0,var(--accent))'">
+              [style.width.%]="mod.progresso"
+              [style.background]="mod.completo ? 'var(--green)' : 'linear-gradient(90deg,#0080d0,var(--accent))'">
             </div>
           </div>
-          <span class="prog-label">{{ mod.progress }}%</span>
+          <span class="prog-label">{{ mod.progresso }}%</span>
         </div>
 
         <button class="mod-btn"
-          [class.resume]="mod.progress > 0 && !mod.completed"
-          [class.start]="mod.progress === 0"
-          [class.done]="mod.completed">
-          {{ mod.completed ? 'Revisar' : mod.progress > 0 ? 'Continuar' : 'Iniciar' }}
-          @if (!mod.completed) {
+          [class.resume]="mod.progresso > 0 && !mod.completo"
+          [class.start]="mod.progresso === 0"
+          [class.done]="mod.completo"
+          (click)="abrirModulo(mod)">
+          {{ mod.completo ? 'Revisar' : mod.progresso > 0 ? 'Continuar' : 'Iniciar' }}
+          @if (!mod.completo) {
             →
           }
         </button>
@@ -146,13 +143,22 @@ h1 { font-size: 1.8rem; font-weight: 800; letter-spacing: -0.02em; }
   `]
 })
 export class ModulosComponent implements OnInit {
-  modules: Module[] = [];
+  modules: Modulo[] = [];
   completedCount = 0;
 
-  constructor(private dataService: DataService) {}
+  constructor(private modulosService: ModulosService, private router: Router) {}
 
-  ngOnInit() {
-    this.modules = this.dataService.getModules();
-    this.completedCount = this.modules.filter(m => m.completed).length;
+  async ngOnInit() {
+    if (!this.modulosService.carregado()) {
+      await this.modulosService.carregar();
+    }
+    this.modules = this.modulosService.modulos();
+    this.completedCount = this.modules.filter(m => m.completo).length;
+  }
+
+  abrirModulo(mod: Modulo) {
+    const aula = this.modulosService.proximaAulaDoModulo(mod);
+    if (!aula) return;
+    this.router.navigate(['/dashboard/modulos', mod.id, 'aula', aula.id]);
   }
 }
