@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { AuthService } from '../../../../core/services/auth.service';
 import { FlashcardsService } from '../../../../core/services/flashcards.service';
 import { GoalsService } from '../../../../core/services/goals.service';
+import { ModulosService } from '../../../../core/services/modulos.service';
 import { PLANOS, PlanId, UserSettings } from '../../../../core/models/user.model';
 
 @Component({
@@ -194,6 +195,7 @@ export class ConfiguracoesComponent {
     private authService: AuthService,
     private flashcardsService: FlashcardsService,
     private goalsService: GoalsService,
+    private modulosService: ModulosService,
     private router: Router,
   ) {}
 
@@ -216,9 +218,10 @@ export class ConfiguracoesComponent {
   }
 
   resetProgress() {
-    if (confirm('Isso vai zerar seu streak, o progresso de revisão dos flashcards e o percentual das suas metas — mas não vai excluir os flashcards/metas em si. Continuar?')) {
+    if (confirm('Isso vai zerar seu streak, o progresso de revisão dos flashcards, o percentual das suas metas e o progresso de TODOS os módulos/aulas — mas não vai excluir os flashcards/metas em si. Continuar?')) {
       this.flashcardsService.resetProgress();
       this.goalsService.resetProgress();
+      this.modulosService.resetarTodoProgresso();
     }
   }
 

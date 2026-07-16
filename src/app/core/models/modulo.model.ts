@@ -1,3 +1,10 @@
+export interface Quiz {
+  pergunta: string;
+  alternativas: string[];
+  correta: number;
+  explicacao: string;
+}
+
 export interface Aula {
   id: number;
   moduloId: number;
@@ -6,6 +13,7 @@ export interface Aula {
   duracaoEstimada: string;
   conteudo: string;
   concluida: boolean;
+  quiz: Quiz | null;
 }
 
 export interface Modulo {

@@ -36,6 +36,32 @@ import { Modulo, Aula } from '../../../../../core/models/modulo.model';
 
     <div class="card conteudo-aula" [innerHTML]="aula.conteudo | markdownLite"></div>
 
+    @if (aula.quiz) {
+      <div class="card quiz-card">
+        <p class="quiz-eyebrow">✏️ Teste rápido</p>
+        <p class="quiz-pergunta">{{ aula.quiz.pergunta }}</p>
+        <div class="quiz-alternativas">
+          @for (alt of aula.quiz.alternativas; track $index) {
+            <button
+              class="quiz-alt"
+              [class.selecionada]="respostaSelecionada === $index"
+              [class.correta]="respostaSelecionada !== null && $index === aula.quiz.correta"
+              [class.errada]="respostaSelecionada === $index && $index !== aula.quiz.correta"
+              [disabled]="respostaSelecionada !== null"
+              (click)="responderQuiz($index)">
+              {{ alt }}
+            </button>
+          }
+        </div>
+        @if (respostaSelecionada !== null) {
+          <p class="quiz-explicacao">
+            {{ respostaSelecionada === aula.quiz.correta ? '✅ Isso mesmo!' : '❌ Quase.' }}
+            {{ aula.quiz.explicacao }}
+          </p>
+        }
+      </div>
+    }
+
     <div class="aula-footer">
       @if (aula.concluida) {
         <div class="ja-concluida">
@@ -43,6 +69,7 @@ import { Modulo, Aula } from '../../../../../core/models/modulo.model';
             <polyline points="20 6 9 17 4 12"/>
           </svg>
           Aula já concluída
+          <button class="link-reiniciar" (click)="reiniciarAula()" [disabled]="salvando">reiniciar essa aula</button>
         </div>
       }
       <button class="btn-continuar" (click)="concluirEContinuar()" [disabled]="salvando">
@@ -79,6 +106,33 @@ import { Modulo, Aula } from '../../../../../core/models/modulo.model';
   ul { margin: 0 0 16px 20px; }
   li { margin-bottom: 8px; }
   strong { color: var(--text-primary); }
+  .callout {
+    background: rgba(0, 196, 255, 0.06); border-left: 3px solid var(--accent);
+    border-radius: 6px; padding: 14px 16px; margin-bottom: 16px;
+    font-size: 0.88rem; color: var(--text-secondary);
+  }
+}
+.quiz-card {
+  margin-top: 20px; padding: 24px;
+}
+.quiz-eyebrow {
+  font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;
+  color: var(--accent); margin-bottom: 10px;
+}
+.quiz-pergunta { font-size: 0.95rem; font-weight: 700; margin-bottom: 16px; }
+.quiz-alternativas { display: flex; flex-direction: column; gap: 10px; }
+.quiz-alt {
+  text-align: left; padding: 12px 16px; border-radius: 8px; cursor: pointer;
+  background: rgba(255,255,255,0.03); border: 1px solid var(--border-card);
+  color: var(--text-secondary); font-size: 0.86rem; transition: all var(--duration) var(--ease);
+  &:hover:not(:disabled) { border-color: var(--accent); background: rgba(0,196,255,0.05); }
+  &:disabled { cursor: default; }
+  &.correta { border-color: var(--green); background: rgba(16,185,129,0.08); color: var(--text-primary); }
+  &.errada { border-color: var(--red); background: rgba(239,68,68,0.08); color: var(--text-primary); }
+}
+.quiz-explicacao {
+  margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border-card);
+  font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6;
 }
 .aula-footer {
   display: flex; align-items: center; justify-content: space-between; margin-top: 24px; gap: 16px;
@@ -86,6 +140,12 @@ import { Modulo, Aula } from '../../../../../core/models/modulo.model';
 }
 .ja-concluida {
   display: flex; align-items: center; gap: 6px; font-size: 0.8rem; font-weight: 600; color: var(--green);
+}
+.link-reiniciar {
+  background: none; border: none; padding: 0; margin-left: 6px; cursor: pointer;
+  color: var(--text-muted); font-size: 0.75rem; font-weight: 600; text-decoration: underline;
+  &:hover { color: var(--text-secondary); }
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
 }
 .btn-continuar {
   margin-left: auto; padding: 12px 22px; border-radius: 8px; border: none; cursor: pointer;
@@ -103,6 +163,7 @@ export class AulaComponent implements OnInit {
   posicao = 0;
   carregando = true;
   salvando = false;
+  respostaSelecionada: number | null = null;
 
   constructor(
     private route: ActivatedRoute,
@@ -125,6 +186,7 @@ export class AulaComponent implements OnInit {
     const resultado = this.modulosService.getAula(moduloId, aulaId);
 
     this.carregando = false;
+    this.respostaSelecionada = null;
     if (!resultado) {
       this.modulo = null;
       this.aula = null;
@@ -135,6 +197,19 @@ export class AulaComponent implements OnInit {
     this.aula = resultado.aula;
     this.proxima = resultado.proxima;
     this.posicao = this.modulo.aulas.findIndex(a => a.id === this.aula!.id) + 1;
+  }
+
+  responderQuiz(indice: number) {
+    if (this.respostaSelecionada !== null) return;
+    this.respostaSelecionada = indice;
+  }
+
+  async reiniciarAula() {
+    if (!this.aula) return;
+    this.salvando = true;
+    await this.modulosService.reiniciarAula(this.aula.id);
+    this.carregarAula();
+    this.salvando = false;
   }
 
   async concluirEContinuar() {

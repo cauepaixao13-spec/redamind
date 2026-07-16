@@ -30,6 +30,7 @@ export class ModulosService {
           duracaoEstimada: a.duracao_estimada,
           conteudo: a.conteudo,
           concluida: concluidas.has(a.id),
+          quiz: a.quiz ?? null,
         }));
 
       const total = aulasDoModulo.length;
@@ -86,5 +87,37 @@ export class ModulosService {
       const feitas = m.aulas.filter(a => a.concluida).length;
       return { ...m, progresso: total === 0 ? 0 : Math.round((feitas / total) * 100), completo: total > 0 && feitas === total };
     }));
+  }
+
+  /** Reinicia SÓ uma aula específica (tira a marcação de concluída dela, sem mexer nas outras). */
+  async reiniciarAula(aulaId: number): Promise<void> {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    await supabase.from('progresso_aulas').delete().eq('user_id', user.id).eq('aula_id', aulaId);
+
+    this.modulos.update(modulos => modulos.map(m => ({
+      ...m,
+      aulas: m.aulas.map(a => a.id === aulaId ? { ...a, concluida: false } : a),
+    })).map(m => {
+      const total = m.aulas.length;
+      const feitas = m.aulas.filter(a => a.concluida).length;
+      return { ...m, progresso: total === 0 ? 0 : Math.round((feitas / total) * 100), completo: total > 0 && feitas === total };
+    }));
+  }
+
+  /** Reinicia TODO o progresso de módulos do usuário (usado no "Resetar progresso" das Configurações). */
+  async resetarTodoProgresso(): Promise<void> {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    await supabase.from('progresso_aulas').delete().eq('user_id', user.id);
+
+    this.modulos.update(modulos => modulos.map(m => ({
+      ...m,
+      progresso: 0,
+      completo: false,
+      aulas: m.aulas.map(a => ({ ...a, concluida: false })),
+    })));
   }
 }

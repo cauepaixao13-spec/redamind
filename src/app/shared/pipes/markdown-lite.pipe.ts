@@ -19,6 +19,12 @@ export class MarkdownLitePipe implements PipeTransform {
     const html = blocos.map(bloco => {
       const linhas = bloco.split('\n').map(l => l.trim()).filter(Boolean);
       const ehLista = linhas.every(l => l.startsWith('- '));
+      const ehCallout = linhas.every(l => l.startsWith('> '));
+
+      if (ehCallout) {
+        const conteudo = linhas.map(l => l.replace(/^> /, '')).join(' ');
+        return `<div class="callout">${negrito(conteudo)}</div>`;
+      }
 
       if (ehLista) {
         const itens = linhas.map(l => {
