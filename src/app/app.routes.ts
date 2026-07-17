@@ -35,6 +35,11 @@ export const routes: Routes = [
           import('./features/dashboard/pages/desafio-semanal/desafio-semanal.component').then(m => m.DesafioSemanalComponent),
       },
       {
+        path: 'minhas-correcoes',
+        loadComponent: () =>
+          import('./features/dashboard/pages/minhas-correcoes/minhas-correcoes.component').then(m => m.MinhasCorrecoesComponent),
+      },
+      {
         path: 'modulos',
         loadComponent: () =>
           import('./features/dashboard/pages/modulos/modulos.component').then(m => m.ModulosComponent),
