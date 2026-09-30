@@ -1,7 +1,8 @@
-import { Component, signal, computed } from '@angular/core';
+import { Component, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { EssayCorrectionService } from '../../../../core/services/essay-correction.service';
+import { TemasSemanaisService } from '../../../../core/services/temas-semanais.service';
 import { CorrecaoResult, NOMES_COMPETENCIAS } from '../../../../core/models/correcao.model';
 
 @Component({
@@ -13,7 +14,7 @@ import { CorrecaoResult, NOMES_COMPETENCIAS } from '../../../../core/models/corr
   <div class="page-header">
     <div>
       <p class="eyebrow">DESAFIO SEMANAL ENEM</p>
-      <h1>Os desafios da inteligência artificial no mundo do trabalho contemporâneo</h1>
+      <h1>{{ tema }}</h1>
       <p class="page-sub">Escreva uma dissertação argumentativa entre 250 e 350 palavras. A Redamind IA avalia automaticamente.</p>
     </div>
   </div>
@@ -305,7 +306,7 @@ h1 { font-size: 1.4rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom
 }
   `]
 })
-export class DesafioSemanalComponent {
+export class DesafioSemanalComponent implements OnInit {
   essayText = signal('');
   focusMode = signal(false);
   corrigindo = signal(false);
@@ -314,11 +315,19 @@ export class DesafioSemanalComponent {
   nomesCompetencias = NOMES_COMPETENCIAS;
   Math = Math;
 
-  private tema = 'Os desafios da inteligência artificial no mundo do trabalho contemporâneo';
+  tema = 'Carregando tema da semana...';
 
   constructor(
     private essayCorrection: EssayCorrectionService,
+    private temasService: TemasSemanaisService,
   ) {}
+
+  async ngOnInit() {
+    if (!this.temasService.carregado()) {
+      await this.temasService.carregar();
+    }
+    this.tema = this.temasService.temaAtual();
+  }
 
   checklist = [
     { label: 'Introdução com tese', done: false },
